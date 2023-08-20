@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+DEFAULT_FILENAME_FORMAT = "[%(uploader)s]%(title)s({}).%(ext)s"
+
 API_KEY = os.getenv('YT_SEARCH_API_KEY')
 CUR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -72,7 +74,12 @@ def write_mp3s_from_channelid(channel_id):
     for song in items:
         song_id, song_title = song_item_info(song)
         print(f'songId: {song_id}')
-        subprocess.run([DL_SCRIPT, song_id, channel_dir_path, str(count)])
+        subprocess.run([
+            DL_SCRIPT,
+            song_id,
+            channel_dir_path,
+            DEFAULT_FILENAME_FORMAT.format(str(count))
+        ])
         count += 1
 
     return channel_dir_path
