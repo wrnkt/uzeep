@@ -41,7 +41,7 @@ def channel_info(id):
     return requests.get(URL, params=params, headers=headers).json()
 
 
-def playlist_items(playlist_id):
+def get_playlist_items(playlist_id):
     URL = 'https://www.googleapis.com/youtube/v3/playlistItems'
     params = {
         'part': 'snippet',
@@ -60,15 +60,17 @@ def get_upload_playlist_id(channel_response):
 
 
 def write_mp3s_from_channelid(channel_id):
-    response = channel_info('UClFmfVl1BXEhd5hw6qMGhVQ')
-    playlist_id = get_upload_playlist_id(response)
-    items = playlist_items(playlist_id)
+    channel_response = channel_info('UClFmfVl1BXEhd5hw6qMGhVQ')
+    playlist_id = get_upload_playlist_id(channel_response)
+    items = get_playlist_items(playlist_id)
 
     channel_dir_path = ''
-    if len(items) > 0:
-        title = channel_title(items[0])
-        channel_dir_path = os.path.join(DOWNLOAD_PATH, title)
-        os.makedirs(channel_dir_path, exist_ok=True)
+    if len(items) == 0:
+        return
+
+    title = channel_title(items[0])
+    channel_dir_path = os.path.join(DOWNLOAD_PATH, title)
+    os.makedirs(channel_dir_path, exist_ok=True)
 
     count = 1
     for song in items:
