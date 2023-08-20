@@ -9,68 +9,25 @@ from zipfile import (
 from rich import print
 from dotenv import load_dotenv
 from pytube import YouTube
+from YTAPI import YTAPI
 
 load_dotenv()
 
-API_KEY = os.getenv('YT_SEARCH_API_KEY')
-CUR_PATH = os.path.dirname(os.path.realpath(__file__))
-
-def channel_title(song_item):
-    return song_item['snippet']['videoOwnerChannelTitle']
-
-
-def song_item_info(song_item):
-    id = song_item['snippet']['resourceId']['videoId']
-    title = song_item['snippet']['title']
-    return (id, title)
-
-
-def channel_info(id):
-    URL = 'https://www.googleapis.com/youtube/v3/channels'
-    params = {
-        'part': 'contentDetails',
-        'maxResults': '50',
-        'id': id,
-        'key': API_KEY
-    }
-    headers = {
-        'Accept': 'application/json'
-    }
-    return requests.get(URL, params=params, headers=headers).json()
-
-
-def get_playlist_items(playlist_id):
-    URL = 'https://www.googleapis.com/youtube/v3/playlistItems'
-    params = {
-        'part': 'snippet',
-        'maxResults': '50',
-        'playlistId': playlist_id,
-        'key': API_KEY
-    }
-    headers = {
-        'Accept': 'application/json'
-    }
-    return requests.get(URL, params=params, headers=headers).json()['items']
-
-
-def get_upload_playlist_id(channel_response):
-    return channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-
-
 def zip_mp3s_from_channelid(channel_id):
-    channel_response = channel_info('UClFmfVl1BXEhd5hw6qMGhVQ')
-    playlist_id = get_upload_playlist_id(channel_response)
-    items = get_playlist_items(playlist_id)
+    ytapi = YTAPI()
+    channel_response = ytapi.channel_info(channel_id)
+    playlist_id = ytapi.get_upload_playlist_id(channel_response)
+    items = ytapi.get_playlist_items(playlist_id)
 
     if len(items) == 0:
-        return
+        return NULL
 
-    title = channel_title(items[0])
+    title = ytapi.channel_title(items[0])
 
     zip_buf = io.BytesIO()
     count = 1
     for song in items:
-        song_id, song_title = song_item_info(song)
+        song_id, song_title = ytapi.song_item_info(song)
         print(f'songId: {song_id}')
 
         yt = YouTube(f"https://www.youtube.com/watch?v={song_id}")
@@ -81,17 +38,18 @@ def zip_mp3s_from_channelid(channel_id):
         with ZipFile(zip_buf, "a", ZIP_DEFLATED, False) as zip_file:
             zip_file.writestr(yt.title + ".mp3", music_buf.getvalue())
 
-        if count == 5:
-            break
-
         count += 1
 
-    with open(f'{title}.zip', 'wb') as f:
-        f.write(zip_buf.getvalue())
+    return zip_buf
 
 
 def main():
-    zip_mp3s_from_channelid("")
+    zip_buf = zip_mp3s_from_channelid('UClFmfVl1BXEhd5hw6qMGhVQ')
+
+    if zip_buf is not NULL:
+        with open(f'{title}.zip', 'wb') as f:
+            f.write(zip_buf.getvalue())
+
 
 if __name__ == '__main__':
     main()
