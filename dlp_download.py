@@ -1,11 +1,16 @@
 import os
+import io
 import subprocess
 import json
 import requests
 import shutil
-from zipfile import ZipFile
+from zipfile import (
+        ZipFile,
+        ZIP_DEFLATED
+)
 from rich import print
 from dotenv import load_dotenv
+from pytube import YouTube
 
 load_dotenv()
 
@@ -87,22 +92,8 @@ def write_mp3s_from_channelid(channel_id):
     return channel_dir_path
 
 
-def archive_folder(folder_path, arch_name):
-    with ZipFile(arch_name, 'w') as zip_object:
-        # Traverse all files in directory
-        for folder_name, sub_folders, file_names in os.walk(folder_path):
-            for filename in file_names:
-                # Create filepath of files in directory
-                file_path = os.path.join(folder_name, filename)
-                # Add files to zip file
-                zip_object.write(file_path, os.path.basename(file_path))
-    # shutil.make_archive(arch_name, "zip", folder_path)
-
-
 def main():
-    #archive_folder("/home/wrnkt/util/music/download/dxlisi", os.path.join(CUR_PATH, 'test.zip'))
     write_mp3s_from_channelid("dsfahsdjfhl")
-
 
 if __name__ == '__main__':
     main()
