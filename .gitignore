@@ -1,4 +1,4 @@
 .env
 *.zip
 download
-__pycache__/
+**/__pycache__/**
