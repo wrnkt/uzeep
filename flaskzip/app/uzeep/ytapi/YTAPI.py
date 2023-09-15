@@ -25,13 +25,13 @@ class YTAPI:
         soup = BeautifulSoup(channel_page, "lxml")
         url_tag = soup.find("meta", property="og:url")
 
-        url = None 
         if url_tag:
             url = url_tag["content"]
             index = url.rfind('/')
             return url[index+1:]
+        else:
+            return None
 
-        return url
 
     def channel_title(self, song_item):
         return song_item['snippet']['videoOwnerChannelTitle']
